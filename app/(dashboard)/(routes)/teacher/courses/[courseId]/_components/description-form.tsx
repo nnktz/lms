@@ -8,6 +8,7 @@ import { Pencil } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
+import { Course } from '@prisma/client';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -21,9 +22,7 @@ import {
 } from '@/components/ui/form';
 
 interface DescriptionFormProps {
-  initialData: {
-    description: string | null;
-  };
+  initialData: Course;
   courseId: string;
 }
 
@@ -43,13 +42,11 @@ export const DescriptionForm: React.FC<DescriptionFormProps> = ({
     setIsEditing((current) => !current);
   };
 
-  const formattedInitialData = {
-    description: initialData.description || '',
-  };
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: formattedInitialData,
+    defaultValues: {
+      description: initialData?.description || '',
+    },
   });
 
   const { isSubmitting, isValid } = form.formState;
