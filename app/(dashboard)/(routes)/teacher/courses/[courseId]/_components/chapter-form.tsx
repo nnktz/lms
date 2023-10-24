@@ -4,7 +4,7 @@ import * as z from 'zod';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { PlusCircle } from 'lucide-react';
+import { Loader2, PlusCircle } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
@@ -12,6 +12,7 @@ import { Chapter, Course } from '@prisma/client';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Form,
   FormControl,
@@ -19,7 +20,7 @@ import {
   FormItem,
   FormMessage,
 } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+import { ChapterList } from './chapter-list';
 
 interface ChapterFormProps {
   initialData: Course & { chapters: Chapter[] };
@@ -35,7 +36,7 @@ export const ChapterForm: React.FC<ChapterFormProps> = ({
   courseId,
 }) => {
   const [isCreating, setIsCreating] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
+  const [isUpdating, setUpdating] = useState(false);
 
   const router = useRouter();
 
@@ -63,10 +64,35 @@ export const ChapterForm: React.FC<ChapterFormProps> = ({
     }
   };
 
+  const onReorder = async (updateData: { id: string; position: number }[]) => {
+    try {
+      setUpdating(true);
+
+      await axios.put(`/api/courses/${courseId}/chapters/reorder`, {
+        list: updateData,
+      });
+      toast.success('Chapter reordered successfully');
+      router.refresh();
+    } catch (error) {
+      toast.error('Something went wrong');
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const onEdit = (id: string) => {
+    router.push(`/api/courses/${courseId}/chapters/${id}`);
+  };
+
   return (
-    <div className='mt-6 border bg-slate-100 rounded-md p-4'>
+    <div className='relative mt-6 border bg-slate-100 rounded-md p-4'>
+      {isUpdating && (
+        <div className='absolute w-full h-full bg-slate-500/20 top-0 right-0 rounded-md flex items-center justify-center'>
+          <Loader2 className='animate-spin h-6 w-6 text-sky-700' />
+        </div>
+      )}
       <div className='font-medium flex items-center justify-between'>
-        Course description
+        Course chapter
         <Button
           onClick={toggleCreate}
           variant='ghost'>
@@ -121,6 +147,11 @@ export const ChapterForm: React.FC<ChapterFormProps> = ({
             !initialData.chapters.length && 'text-slate-500 italic'
           )}>
           {!initialData.chapters.length && 'No chapters'}
+          <ChapterList
+            onEdit={onEdit}
+            onReorder={onReorder}
+            items={initialData.chapters || []}
+          />
         </div>
       )}
 
