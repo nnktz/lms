@@ -81,7 +81,7 @@ export const ChapterForm: React.FC<ChapterFormProps> = ({
   };
 
   const onEdit = (id: string) => {
-    router.push(`/api/courses/${courseId}/chapters/${id}`);
+    router.push(`/teacher/courses/${courseId}/chapters/${id}`);
   };
 
   return (
