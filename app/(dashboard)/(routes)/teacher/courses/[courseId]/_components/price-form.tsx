@@ -11,7 +11,9 @@ import { useRouter } from 'next/navigation';
 import { Course } from '@prisma/client';
 
 import { cn } from '@/lib/utils';
+import { formatPrice } from '@/lib/format';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Form,
   FormControl,
@@ -19,22 +21,19 @@ import {
   FormItem,
   FormMessage,
 } from '@/components/ui/form';
-import { Combobox } from '@/components/ui/combobox';
 
-interface CategoryFormProps {
+interface PriceFormProps {
   initialData: Course;
   courseId: string;
-  options: { label: string; value: string }[];
 }
 
 const formSchema = z.object({
-  categoryId: z.string().min(1),
+  price: z.coerce.number(),
 });
 
-export const CategoryForm: React.FC<CategoryFormProps> = ({
+export const PriceForm: React.FC<PriceFormProps> = ({
   initialData,
   courseId,
-  options,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
 
@@ -47,7 +46,7 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      categoryId: initialData?.categoryId || '',
+      price: initialData?.price || undefined,
     },
   });
 
@@ -64,14 +63,10 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
     }
   };
 
-  const selectedOption = options.find(
-    (option) => option.value === initialData.categoryId
-  );
-
   return (
     <div className='mt-6 border bg-slate-100 rounded-md p-4'>
       <div className='font-medium flex items-center justify-between'>
-        Course category
+        Course price
         <Button
           onClick={toggleEdit}
           variant='ghost'>
@@ -80,7 +75,7 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
           ) : (
             <>
               <Pencil className='h-4 w-4 mr-2' />
-              Edit category
+              Edit price
             </>
           )}
         </Button>
@@ -90,9 +85,11 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
         <p
           className={cn(
             'text-sm mt-2',
-            !initialData.categoryId && 'text-slate-500 italic'
+            !initialData.price && 'text-slate-500 italic'
           )}>
-          {selectedOption?.label || 'No category'}
+          {initialData.price
+            ? formatPrice(initialData.price)
+            : 'No price available'}
         </p>
       )}
 
@@ -104,12 +101,16 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
             className='space-y-4 mt-4'>
             <FormField
               control={form.control}
-              name='categoryId'
+              name='price'
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Combobox
-                      options={...options}
+                    <Input
+                      autoComplete='off'
+                      type='number'
+                      step='0.01'
+                      disabled={isSubmitting}
+                      placeholder='Set a price for your course'
                       {...field}
                     />
                   </FormControl>
