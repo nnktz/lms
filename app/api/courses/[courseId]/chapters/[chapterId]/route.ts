@@ -40,7 +40,7 @@ export async function DELETE(
     });
 
     if (!chapter) {
-      return new NextResponse('Chapter not found', { status: 401 });
+      return new NextResponse('Chapter not found', { status: 404 });
     }
 
     if (chapter.videoUrl) {
