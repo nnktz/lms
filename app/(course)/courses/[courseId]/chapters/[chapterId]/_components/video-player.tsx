@@ -1,9 +1,10 @@
 'use client';
 
-import { cn } from '@/lib/utils';
 import MuxPlayer from '@mux/mux-player-react';
-import { Loader2, Lock } from 'lucide-react';
 import { useState } from 'react';
+import { Loader2, Lock } from 'lucide-react';
+
+import { cn } from '@/lib/utils';
 
 interface VideoPlayerProps {
   chapterId: string;
